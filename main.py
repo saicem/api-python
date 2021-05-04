@@ -1,3 +1,4 @@
+from saicem.logger import log
 from saicem.elequery import EleQuery
 from fastapi import FastAPI
 from pydantic import BaseModel
@@ -20,7 +21,8 @@ def read_root(nickName, password, roomno, factorycode, area):
     resOut = ResOut()
     query = EleQuery()
     res = query.Get(nickName, password, roomno, factorycode, area)
-    if res == 0:
+    if res[0] != '{':
+        log(res)
         return resOut
     else:
         resOut.ok = True
