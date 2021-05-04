@@ -7,12 +7,12 @@ app = FastAPI()
 
 class ResOut(BaseModel):
     ok: bool = False
-    data: str = "asd"
+    data: str = ""
 
 
 @app.get("/")
 def read_root():
-    return {"Hello": "World"}
+    return "ok"
 
 
 @app.get("/cwsf/", response_model=ResOut)
