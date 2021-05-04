@@ -1,14 +1,12 @@
+from numpy.core.numeric import False_
+from pydantic.types import Json
 from saicem.logger import log
 from saicem.elequery import EleQuery
 from fastapi import FastAPI
 from pydantic import BaseModel
+import json
 
 app = FastAPI()
-
-
-class ResOut(BaseModel):
-    ok: bool = False
-    data: str = ""
 
 
 @app.get("/")
@@ -16,15 +14,16 @@ def read_root():
     return "ok"
 
 
-@app.get("/cwsf/", response_model=ResOut)
+@app.get("/cwsf/")
 def read_root(nickName, password, roomno, factorycode, area):
-    resOut = ResOut()
     query = EleQuery()
     res = query.Get(nickName, password, roomno, factorycode, area)
-    if res[0] != '{':
-        log(res)
-        return resOut
+    if res[0] != "{":
+        return {"ok": False}
     else:
-        resOut.ok = True
-        resOut.data = res
-        return resOut
+        resJson = json.loads(res)
+        return {
+            "ok": True,
+            "readTime": resJson["roomlist"]["readTime"],
+            "remainPower": resJson["roomlist"]["remainPower"],
+        }
