@@ -1,9 +1,6 @@
-from numpy.core.numeric import False_
-from pydantic.types import Json
 from saicem.logger import log
 from saicem.elequery import EleQuery
 from fastapi import FastAPI
-from pydantic import BaseModel
 import json
 
 app = FastAPI()
