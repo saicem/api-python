@@ -12,6 +12,8 @@ uvicorn main:app
 ```
 
 ### deploy
-
-nohup uvicorn main:app --port 5910
+```
+cd apipy
+nohup uvicorn main:app --port 5910 &
 pkill uvicorn
+```
