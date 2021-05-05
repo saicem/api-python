@@ -16,6 +16,7 @@ def read_root(nickName, password, roomno, factorycode, area):
     query = EleSpider()
     res = query.Get(nickName, password, roomno, factorycode, area)
     if res[0] != "{":
+        log(res)
         return {"ok": False}
     else:
         resJson = json.loads(res)
