@@ -26,11 +26,9 @@ def request_sessionId(json_data):
         "Host": "zhxg.whut.edu.cn",
     }
     headers["User-Agent"] = random.choice(useragentlist)
-    r = requests.post(url=url, headers=headers, json=json_data)
-    result = json.loads(r.text)
-    log(result, "healthCheck")
-    sessionId = result["data"]["sessionId"]
-    return str(sessionId)
+    resp = requests.post(url=url, headers=headers, json=json_data)
+    log(resp.text, "healthCheck")
+    return resp.text
 
 
 def request_bindUserInfo(sessionId, json_data):
@@ -57,9 +55,9 @@ def request_bindUserInfo(sessionId, json_data):
         "Host": "zhxg.whut.edu.cn",
     }
     headers["User-Agent"] = random.choice(useragentlist)
-    r = requests.post(url=url, headers=headers, json=json_data)
-    log(r.text, "healthCheck")
-    return r.text
+    resp = requests.post(url=url, headers=headers, json=json_data)
+    log(resp.text, "healthCheck")
+    return resp.text
 
 
 def request_monitorRegister(name, sessionId, province, city, county, street):
@@ -103,9 +101,9 @@ def request_monitorRegister(name, sessionId, province, city, county, street):
         "city": city,
         "county": county,
     }
-    r = requests.post(url=url, headers=headers, json=json_data)
-    log(r.text, "healthCheck")
-    return r.text
+    resp = requests.post(url=url, headers=headers, json=json_data)
+    log(resp.text, "healthCheck")
+    return resp.text
 
 
 def cancelBind(sessionId):
@@ -128,9 +126,9 @@ def cancelBind(sessionId):
         "Host": "zhxg.whut.edu.cn",
     }
     headers["User-Agent"] = random.choice(useragentlist)
-    r = requests.post(url=url, headers=headers)
-    log(r.text, "healthCheck")
-    return r.text
+    resp = requests.post(url=url, headers=headers)
+    log(resp.text, "healthCheck")
+    return resp.text
 
 
 def healthCheck(_nickname, _sn, _idCard):
@@ -142,8 +140,8 @@ def healthCheck(_nickname, _sn, _idCard):
     county = "洪山区"
     street = "广场东二路"
     json_data = {"sn": sn, "idCard": idCard, "nickname": nickname}
-    sessionId = request_sessionId(json_data)
-    log(sessionId, "healthCheck")
+    msgSession = request_sessionId(json_data)
+    sessionId = json.loads(msgSession)["data"]["sessionId"]
     msgBind = request_bindUserInfo(sessionId, json_data)
     resJson = json.loads(msgBind)
     if resJson["status"] == True:
@@ -151,8 +149,7 @@ def healthCheck(_nickname, _sn, _idCard):
             nickname, sessionId, province, city, county, street
         )
         msgCancel = cancelBind(sessionId)
-        return "{}\n{}\n{}\n{}\n".format(sessionId, msgBind, msgCheck, msgCancel)
+        return True, "{}\n{}\n{}\n{}\n".format(msgSession, msgBind, msgCheck, msgCancel)
     else:
         msgCancel = cancelBind(sessionId)
-        log(resJson["message"], "healthCheck")
-        return "{}\n{}\n{}\n".format(sessionId, msgBind, msgCancel)
+        return False, "{}\n{}\n{}\n".format(msgSession, msgBind, msgCancel)

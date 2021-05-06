@@ -29,6 +29,6 @@ def cwsfQuery(nickName, password, roomno, factorycode, area):
 
 
 @app.get("/check/")
-def autoHealthCheck(_nickname, _sn, _idCard):
-    msg = healthCheck(_nickname, _sn, _idCard)
-    return {"ok": True, "msg": msg}
+def autoHealthCheck(nickname, sn, idCard):
+    isvalidUser, msg = healthCheck(nickname, sn, idCard)
+    return {"ok": isvalidUser, "msg": msg}
