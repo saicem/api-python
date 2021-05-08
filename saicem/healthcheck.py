@@ -143,13 +143,20 @@ def healthCheck(_nickname, _sn, _idCard):
     msgSession = request_sessionId(json_data)
     sessionId = json.loads(msgSession)["data"]["sessionId"]
     msgBind = request_bindUserInfo(sessionId, json_data)
-    resJson = json.loads(msgBind)
-    if resJson["status"] == True:
+    jsonBind = json.loads(msgBind)
+    if jsonBind["status"] == True:
         msgCheck = request_monitorRegister(
             nickname, sessionId, province, city, county, street
         )
         msgCancel = cancelBind(sessionId)
-        return True, "{}\n{}\n{}\n{}\n".format(msgSession, msgBind, msgCheck, msgCancel)
+        jsonCheck = json.loads(msgCheck)
+        if jsonCheck["status"] == True:
+            appendInfo = "填报成功"
+        else:
+            appendInfo = jsonCheck["message"]
+        return True, "{}\n{}\n{}\n{}\n{}\n".format(
+            appendInfo, msgSession, msgBind, msgCheck, msgCancel
+        )
     else:
         msgCancel = cancelBind(sessionId)
         return False, "{}\n{}\n{}\n".format(msgSession, msgBind, msgCancel)
