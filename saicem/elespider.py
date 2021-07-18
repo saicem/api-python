@@ -1,7 +1,7 @@
 import requests
 import cv2
 import numpy as np
-from saicem.imgDistinguish import charDistinguish
+from saicem.imgDistinguish import char_distinguish
 
 
 class EleSpider:
@@ -10,50 +10,50 @@ class EleSpider:
     __uriEleFee = "http://cwsf.whut.edu.cn/querySydl?roomno={}&factorycode={}&area={}"
     __cookie = ""
 
-    def __getCode(self):
+    def __get_code(self):
         resp = requests.get(self.__uriCode)
         self.__cookie = "=".join(resp.cookies.items()[0])
-        codeImg = cv2.imdecode(np.frombuffer(resp.content, np.uint8), 1)
-        return codeImg
+        code_img = cv2.imdecode(np.frombuffer(resp.content, np.uint8), 1)
+        return code_img
 
-    def __login(self, nickName, password, checkCode):
-        uri = self.__uriLogin.format(nickName, password, checkCode)
+    def __login(self, nick_name, password, check_code):
+        uri = self.__uriLogin.format(nick_name, password, check_code)
         requests.get(uri, headers={"Cookie": self.__cookie})
 
-    def __ImageDistinguish(self, codeImg):
-        im_gray = cv2.cvtColor(codeImg, cv2.COLOR_BGR2GRAY)
+    def __image_distinguish(self, code_img):
+        im_gray = cv2.cvtColor(code_img, cv2.COLOR_BGR2GRAY)
         ret, im_inv = cv2.threshold(im_gray, 127, 255, cv2.THRESH_BINARY_INV)
-        cutImage = []
+        cut_image = []
         num = []
-        cutImage.append(im_inv[3:15, 8:17])
-        cutImage.append(im_inv[3:15, 23:32])
-        cutImage.append(im_inv[3:15, 38:47])
-        cutImage.append(im_inv[3:15, 53:62])
-        num.append(charDistinguish(cutImage[0]))
-        num.append(charDistinguish(cutImage[1]))
-        num.append(charDistinguish(cutImage[2]))
-        num.append(charDistinguish(cutImage[3]))
+        cut_image.append(im_inv[3:15, 8:17])
+        cut_image.append(im_inv[3:15, 23:32])
+        cut_image.append(im_inv[3:15, 38:47])
+        cut_image.append(im_inv[3:15, 53:62])
+        num.append(char_distinguish(cut_image[0]))
+        num.append(char_distinguish(cut_image[1]))
+        num.append(char_distinguish(cut_image[2]))
+        num.append(char_distinguish(cut_image[3]))
         if num.count(-1) > 0:
-            checkCode = -1
+            check_code = -1
         else:
-            checkCode = "".join(num)
-        return checkCode
+            check_code = "".join(num)
+        return check_code
 
-    def __getEleFee(self, roomno, factorycode, area):
+    def __get_ele_fee(self, roomno, factorycode, area):
         uri = self.__uriEleFee.format(roomno, factorycode, area)
         resp = requests.get(uri, headers={"Cookie": self.__cookie})
         return resp.text
 
-    def Get(self, nickName, password, roomno, factorycode, area):
+    def get(self, nick_name, password, roomno, factorycode, area):
         for i in range(10):
-            codeImg = self.__getCode()
-            checkCode = self.__ImageDistinguish(codeImg)
-            if checkCode != -1:
+            code_img = self.__get_code()
+            check_code = self.__image_distinguish(code_img)
+            if check_code != -1:
                 break
-        if checkCode == -1:
+        if check_code == -1:
             return 0
-        self.__login(nickName, password, checkCode)
-        return self.__getEleFee(roomno, factorycode, area)
+        self.__login(nick_name, password, check_code)
+        return self.__get_ele_fee(roomno, factorycode, area)
 
 
 # {

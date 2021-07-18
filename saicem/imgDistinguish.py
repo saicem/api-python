@@ -1,5 +1,5 @@
-def charDistinguish(numImg):
-    charSet = {
+def char_distinguish(num_img):
+    char_set = {
         "0": [
             [0, 0, 1, 1, 1, 1, 0, 0, 0],
             [0, 1, 0, 0, 0, 0, 1, 0, 0],
@@ -141,15 +141,15 @@ def charDistinguish(numImg):
             [0, 0, 1, 1, 1, 0, 0, 0, 0],
         ],
     }
-    ks = charSet.keys()
+    ks = char_set.keys()
     for k in ks:
         # cnt 9 * 12 = 108
         cnt = 0
         for i in range(12):
             for j in range(9):
-                if numImg[i][j] > 200 and charSet[k][i][j] == 1:
+                if num_img[i][j] > 200 and char_set[k][i][j] == 1:
                     cnt += 1
-                elif numImg[i][j] <= 200 and charSet[k][i][j] == 0:
+                elif num_img[i][j] <= 200 and char_set[k][i][j] == 0:
                     cnt += 1
         if cnt > 95:
             return k

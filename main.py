@@ -1,7 +1,7 @@
 from saicem.logger import log
 from saicem.elespider import EleSpider
 from fastapi import FastAPI
-from saicem.healthcheck import healthCheck
+from saicem.healthcheck import health_check
 import json
 
 app = FastAPI()
@@ -13,22 +13,22 @@ def test():
 
 
 @app.get("/cwsf/")
-def cwsfQuery(nickName, password, roomno, factorycode, area):
+def cwsf_query(nickname, password, roomno, factorycode, area):
     query = EleSpider()
-    res = query.Get(nickName, password, roomno, factorycode, area)
+    res = query.get(nickname, password, roomno, factorycode, area)
     if res[0] != "{":
         log(res, "cwsf")
         return {"ok": False}
     else:
-        resJson = json.loads(res)
+        res_json = json.loads(res)
         return {
             "ok": True,
-            "readTime": resJson["roomlist"]["readTime"],
-            "remainPower": resJson["roomlist"]["remainPower"],
+            "readTime": res_json["roomlist"]["readTime"],
+            "remainPower": res_json["roomlist"]["remainPower"],
         }
 
 
 @app.get("/check/")
-def autoHealthCheck(nickname, sn, idCard):
-    isvalidUser, msg = healthCheck(nickname, sn, idCard)
-    return {"ok": isvalidUser, "msg": msg}
+def auto_health_check(nickname, sn, id_card):
+    isvalid_user, msg = health_check(nickname, sn, id_card)
+    return {"ok": isvalid_user, "msg": msg}
