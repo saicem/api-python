@@ -45,13 +45,16 @@ class EleSpider:
         return resp.text
 
     def get(self, nick_name, password, roomno, factorycode, area):
+        # 识别验证码 最多识别10次
         for i in range(10):
             code_img = self.__get_code()
             check_code = self.__image_distinguish(code_img)
             if check_code != -1:
                 break
+        # 如果识别验证码不成功 则返回
         if check_code == -1:
             return 0
+        # 登录获取cookie
         self.__login(nick_name, password, check_code)
         return self.__get_ele_fee(roomno, factorycode, area)
 
