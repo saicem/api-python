@@ -53,7 +53,30 @@ class HealthCheck:
                 str(province) + str(city) + str(county) + str(street)
         )
 
-    def __get_session_id(self) -> str:
+    # 获取 data 下的 session_id 别的没什么卵用 至于检测绑定 code 参数来历不明
+    # 已绑定
+    # {
+    #     "status": true,
+    #     "code": 0,
+    #     "message": null,
+    #     "data": {
+    #         "bind": false,
+    #         "sessionId": "9777f75c-aa18-46cf-b607-6f65c939e829"
+    #     },
+    #     "otherData": {}
+    # }
+    # 未绑定
+    # {
+    #     "status": true,
+    #     "code": 0,
+    #     "message": null,
+    #     "data": {
+    #         "bind": false,
+    #         "sessionId": "9777f75c-aa18-46cf-b607-6f65c939e829"
+    #     },
+    #     "otherData": {}
+    # }
+    def get_session_id(self):
         url = "https://zhxg.whut.edu.cn/yqtjwx/api/login/checkBind"
         headers = {
             "Accept-Encoding": "gzip, deflate, br",
@@ -69,8 +92,52 @@ class HealthCheck:
         resp = requests.post(url=url, headers=headers, json=self.__json_data)
         self.__session_id = json.loads(resp.text)["data"]["sessionId"]
         log(resp.text, "healthCheck")
-        return resp.text
 
+    # 绑定用户
+    # 已被绑定
+    # {
+    #     "status": false,
+    #     "code": 50000,
+    #     "message": "该学号已被其它微信绑定",
+    #     "data": null,
+    #     "otherData": {}
+    # }
+    # 错误
+    # {
+    #     "status": false,
+    #     "code": 50000,
+    #     "message": "输入信息不符合",
+    #     "data": null,
+    #     "otherData": {}
+    # }
+    # 未绑定
+    # {
+    #     "status": true,
+    #     "code": 0,
+    #     "message": null,
+    #     "data": {
+    #         "user": {
+    #             "id": 1868364,
+    #             "openId": "",
+    #             "sn": "0121904950722",
+    #             "nickName": "青鸟飞跃",
+    #             "gender": null,
+    #             "language": null,
+    #             "city": null,
+    #             "province": null,
+    #             "country": null,
+    #             "avatarUrl": null,
+    #             "createDate": "2021-07-19T23:43:25",
+    #             "updateDate": "2021-07-20T00:06:37",
+    #             "name": "余世杰",
+    #             "college": "安全科学与应急管理学院",
+    #             "className": "公管1902",
+    #             "major": "公共事业管理",
+    #             "unionId": null
+    #         }
+    #     },
+    #     "otherData": {}
+    # }
     def __get_bind_user_info(self) -> str:
         url = "https://zhxg.whut.edu.cn/yqtjwx/api/login/bindUserInfo"
         headers = {
@@ -90,6 +157,21 @@ class HealthCheck:
         log(resp.text, "healthCheck")
         return resp.text
 
+    # 提交表单
+    # {
+    #     "status": true,
+    #     "code": 0,
+    #     "message": null,
+    #     "data": true,
+    #     "otherData": {}
+    # }
+    # {
+    #     "status": false,
+    #     "code": 50000,
+    #     "message": "今日已填报",
+    #     "data": null,
+    #     "otherData": {}
+    # }
     def __submit_form(self) -> str:
         current_address = (
                 str(self.__province) + str(self.__city) + str(self.__county) + str(self.__street)
@@ -128,7 +210,22 @@ class HealthCheck:
         log(resp.text, "healthCheck")
         return resp.text
 
-    def __cancel_bind(self) -> str:
+    # 取消绑定
+    # {
+    #     "status": true,
+    #     "code": 0,
+    #     "message": null,
+    #     "data": "解绑成功",
+    #     "otherData": {}
+    # }
+    # {
+    #     "status": false,
+    #     "code": 50000,
+    #     "message": "解绑用户不存在",
+    #     "data": null,
+    #     "otherData": {}
+    # }
+    def __cancel_bind(self):
         url = "https://zhxg.whut.edu.cn/yqtjwx/api/login/cancelBind"
         headers = {
             "Accept-Encoding": "gzip, deflate, br",
@@ -141,26 +238,30 @@ class HealthCheck:
         }
         resp = requests.post(url=url, headers=headers)
         log(resp.text, "healthCheck")
-        return resp.text
 
-    def health_check(self):
+    # 健康填报全过程
+    def health_check(self) -> str:
         logger.log(
             self.__nickname + self.__sn + self.__id_card + self.__province + self.__city + self.__county + self.__street + self.__is_in_school,
             "healthCheck")
-        msg_session = self.__get_session_id()
+        self.get_session_id()
         msg_bind = self.__get_bind_user_info()
         json_bind = json.loads(msg_bind)
-        if json_bind["status"]:
-            msg_check = self.__submit_form()
-            msg_cancel = self.__cancel_bind()
-            json_check = json.loads(msg_check)
-            if json_check["status"]:
-                append_info = "填报成功"
+        # 绑定是否成功
+        try:
+            if json_bind["status"]:
+                msg_check = self.__submit_form()
+                self.__cancel_bind()
+                json_check = json.loads(msg_check)
+                if json_check["status"]:
+                    return "填报成功"
+                else:
+                    # 今日已填报
+                    return json_check["message"]
             else:
-                append_info = json_check["message"]
-            return True, "{}\n{}\n{}\n{}\n{}\n".format(
-                append_info, msg_session, msg_bind, msg_check, msg_cancel
-            )
-        else:
-            msg_cancel = self.__cancel_bind()
-            return False, "{}\n{}\n{}\n".format(msg_session, msg_bind, msg_cancel)
+                self.__cancel_bind()
+                # 该学号已被其它微信绑定 输入信息不符合
+                return json_bind["message"]
+        finally:
+            self.__cancel_bind()
+            return "特殊错误"

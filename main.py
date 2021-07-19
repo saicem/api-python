@@ -30,7 +30,8 @@ def cwsf_query(nickname, password, roomno, factorycode, area):
 
 @app.post("/check/")
 def auto_health_check(nickname, sn, id_card, province, city, county, street, is_in_school):
-    i, msg = HealthCheck(nickname, sn, id_card, province, city, county, street, is_in_school).health_check()
-
-    # isvalid_user, msg = health_check(nickname, sn, id_card)
-    return {"code": 0, "msg": msg}
+    msg = HealthCheck(nickname, sn, id_card, province, city, county, street, is_in_school).health_check()
+    if msg == "填报成功":
+        return {"code": 0, "msg": msg}
+    else:
+        return {"code": -1, "msg": msg}
