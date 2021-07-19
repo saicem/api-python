@@ -1,6 +1,8 @@
 import requests
 import random
 import json
+
+from saicem import logger
 from saicem.logger import log
 
 
@@ -65,7 +67,7 @@ class HealthCheck:
             "User-Agent": random.choice(self.__useragent_list),
         }
         resp = requests.post(url=url, headers=headers, json=self.__json_data)
-        self.session_id = json.loads(resp.text)["data"]["sessionId"]
+        self.__session_id = json.loads(resp.text)["data"]["sessionId"]
         log(resp.text, "healthCheck")
         return resp.text
 
@@ -142,6 +144,9 @@ class HealthCheck:
         return resp.text
 
     def health_check(self):
+        logger.log(
+            self.__nickname + self.__sn + self.__id_card + self.__province + self.__city + self.__county + self.__street + self.__is_in_school,
+            "healthCheck")
         msg_session = self.__get_session_id()
         msg_bind = self.__get_bind_user_info()
         json_bind = json.loads(msg_bind)
