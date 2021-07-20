@@ -7,7 +7,7 @@ from saicem.imgDistinguish import char_distinguish
 class EleSpider:
     __uriCode = "http://cwsf.whut.edu.cn/authImage"
     __uriLogin = "http://cwsf.whut.edu.cn/innerUserLogin?logintype=PLATFORM&nickName={}&password={}&checkCode={}"
-    __uriEleFee = "http://cwsf.whut.edu.cn/querySydl?roomno={}&factorycode={}&area={}"
+    __uriEleFee = "http://cwsf.whut.edu.cn/queryReserve"
     __cookie = ""
 
     def __get_code(self):
@@ -20,7 +20,7 @@ class EleSpider:
         uri = self.__uriLogin.format(nick_name, password, check_code)
         requests.get(uri, headers={"Cookie": self.__cookie})
 
-    def __image_distinguish(self, code_img):
+    def __captcha_distinguish(self, code_img) -> str:
         im_gray = cv2.cvtColor(code_img, cv2.COLOR_BGR2GRAY)
         ret, im_inv = cv2.threshold(im_gray, 127, 255, cv2.THRESH_BINARY_INV)
         cut_image = []
@@ -39,16 +39,19 @@ class EleSpider:
             check_code = "".join(num)
         return check_code
 
-    def __get_ele_fee(self, roomno, factorycode, area):
-        uri = self.__uriEleFee.format(roomno, factorycode, area)
-        resp = requests.get(uri, headers={"Cookie": self.__cookie})
+    def __get_ele_fee(self, meter_id, factorycode) -> str:
+        uri = self.__uriEleFee
+        resp = requests.post(uri, headers={"Cookie": self.__cookie}, data={
+            "meterId": meter_id,
+            "factorycode": factorycode,
+        })
         return resp.text
 
-    def get(self, nick_name, password, roomno, factorycode, area):
+    def get(self, nick_name, password, meter_id, factorycode):
         # 识别验证码 最多识别10次
         for i in range(10):
             code_img = self.__get_code()
-            check_code = self.__image_distinguish(code_img)
+            check_code = self.__captcha_distinguish(code_img)
             if check_code != -1:
                 break
         # 如果识别验证码不成功 则返回
@@ -56,8 +59,7 @@ class EleSpider:
             return 0
         # 登录获取cookie
         self.__login(nick_name, password, check_code)
-        return self.__get_ele_fee(roomno, factorycode, area)
-
+        return self.__get_ele_fee(meter_id, factorycode)
 
 # {
 #     "roomlist": {

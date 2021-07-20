@@ -12,19 +12,35 @@ def test():
     return "ok"
 
 
+# nickname 学号
+# password 身份证后六位
+# meter_id 电表ID
+# factorycode 楼栋ID
+# 查询得到的表单
+# {
+#   "ok": true,
+#   "data": {
+#     "remainPower": "13.35",
+#     "valve": "电表--在线",
+#     "ZVlaue": "10641.5",
+#     "meterOverdue": "0",
+#     "returncode": "SUCCESS",
+#     "returnmsg": "ok"
+#   }
+# }
 @app.get("/cwsf/")
-def cwsf_query(nickname, password, roomno, factorycode, area):
+def cwsf_query(nickname, password, meter_id, factorycode):
     query = EleSpider()
-    res = query.get(nickname, password, roomno, factorycode, area)
+    res = query.get(nickname, password, meter_id, factorycode)
     if res[0] != "{":
         log(res, "cwsf")
-        return {"ok": False}
+        return {"code": -1}
     else:
         res_json = json.loads(res)
+        # todo 为什么不行
         return {
-            "ok": True,
-            "readTime": res_json["roomlist"]["readTime"],
-            "remainPower": res_json["roomlist"]["remainPower"],
+            "code": 0,
+            "data": res_json,
         }
 
 
