@@ -2,6 +2,7 @@ from saicem.logger import log
 from saicem.electric import EleSpider
 from fastapi import FastAPI
 from saicem.healthcheck import HealthCheck
+from pydantic import BaseModel
 import json
 
 app = FastAPI()
@@ -10,6 +11,13 @@ app = FastAPI()
 @app.get("/")
 def test():
     return "ok"
+
+
+class ElectricForm(BaseModel):
+    sn: str
+    id_card: str
+    meter_id: str
+    factorycode: str
 
 
 # nickname 学号
@@ -29,9 +37,10 @@ def test():
 #   }
 # }
 @app.get("/cwsf/")
-def cwsf_query(nickname, password, meter_id, factorycode):
+def cwsf_query(form: ElectricForm):
     query = EleSpider()
-    res = query.get(nickname, password, meter_id, factorycode)
+    res = query.get(
+        form.sn, form.id_card, form.meter_id, form.factorycode)
     if res[0] != "{":
         log(res, "cwsf")
         # 实际还有可能是 系统开放时间早00:10到23:20
@@ -83,10 +92,29 @@ def cwsf_query(nickname, password, meter_id, factorycode):
             }
 
 
+class HealthCheckForm(BaseModel):
+    nickname: str
+    sn: str
+    id_card: str
+    province: str
+    city: str
+    county: str
+    street: str
+    is_in_school: bool
+
+
 @app.post("/check/")
-def auto_health_check(nickname: str, sn: str, id_card: str, province: str, city: str, county: str, street: str,
-                      is_in_school: bool):
-    msg = HealthCheck(nickname, sn, id_card, province, city, county, street, is_in_school).health_check()
+def auto_health_check(check_form: HealthCheckForm):
+    msg = HealthCheck(
+        check_form.nickname,
+        check_form.sn,
+        check_form.id_card,
+        check_form.province,
+        check_form.city,
+        check_form.county,
+        check_form.street,
+        check_form.is_in_school
+    ).health_check()
     if msg == "填报成功":
         return {"ok": True, "msg": msg}
     else:
