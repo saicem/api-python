@@ -1,6 +1,7 @@
 import time
 
 
+# todo 日志重写
 def log(msg: str, kind: str):
     file_name = kind + time.strftime("%Y%m%d", time.localtime()) + ".log"
     f = open(file_name, "a", encoding="utf8")

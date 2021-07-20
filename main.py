@@ -34,20 +34,28 @@ def cwsf_query(nickname, password, meter_id, factorycode):
     res = query.get(nickname, password, meter_id, factorycode)
     if res[0] != "{":
         log(res, "cwsf")
-        return {"code": -1}
+        return {"ok": False, "msg": "密码错误"}
     else:
         res_json = json.loads(res)
-        # todo 为什么不行
-        return {
-            "code": 0,
-            "data": res_json,
-        }
+        try:
+            remain_power = res_json["remainPower"]
+            return {
+                "ok": True,
+                "msg": "success",
+                "data": remain_power,
+            }
+        except:
+            log(res_json, "electric")
+            return {
+                "ok": False,
+                "msg": "解析电费失败",
+            }
 
 
 @app.post("/check/")
 def auto_health_check(nickname, sn, id_card, province, city, county, street, is_in_school):
     msg = HealthCheck(nickname, sn, id_card, province, city, county, street, is_in_school).health_check()
     if msg == "填报成功":
-        return {"code": 0, "msg": msg}
+        return {"ok": True, "msg": msg}
     else:
-        return {"code": -1, "msg": msg}
+        return {"ok": False, "msg": msg}

@@ -17,6 +17,7 @@ class HealthCheck:
     __session_id: str
     __json_data: dict
     __is_in_school: bool
+    __is_leave_chengdu: bool
     __current_address: str
     __useragent_list = [
         "Mozilla/5.0 (Linux; U; Android 7.1.2; zh-cn; MI 6 Build/NXTHUAWEI) AppleWebKit/537.36 (KHTML, like Gecko)Version/4.0 MQQBrowser/9.9 Mobile Safari/537.36",
@@ -49,6 +50,7 @@ class HealthCheck:
         self.__street = street
         self.__json_data = {"sn": sn, "idCard": id_card, "nickname": nickname}
         self.__is_in_school = is_in_school
+        self.__is_leave_chengdu = 1 - is_in_school
         self.__current_address = (
                 str(province) + str(city) + str(county) + str(street)
         )
@@ -198,10 +200,10 @@ class HealthCheck:
             "healthInfo": "正常",
             "isDiagnosis": 0,
             "isFever": 0,
-            "isInSchool": "1",
-            "isLeaveChengdu": 0,
+            "isInSchool": int(self.__is_in_school),
+            "isLeaveChengdu": int(self.__is_leave_chengdu),
             "isSymptom": "0",
-            "temperature": "36.5°C~36.9°C",
+            "temperature": random.choice(self.__temperature_list),
             "province": self.__province,
             "city": self.__city,
             "county": self.__county,
