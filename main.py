@@ -36,7 +36,7 @@ class ElectricForm(BaseModel):
 #     "returnmsg": "ok"
 #   }
 # }
-@app.get("/cwsf/")
+@app.post("/cwsf/")
 def cwsf_query(form: ElectricForm):
     query = EleSpider()
     res = query.get(
