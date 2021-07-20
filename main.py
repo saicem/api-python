@@ -34,6 +34,37 @@ def cwsf_query(nickname, password, meter_id, factorycode):
     res = query.get(nickname, password, meter_id, factorycode)
     if res[0] != "{":
         log(res, "cwsf")
+        # 实际还有可能是 系统开放时间早00:10到23:20
+        # <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+        #
+        # <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        # <meta name="renderer" content="webkit">
+        # <script src="/lib/jQuery 1.11.1.js" type="text/javascript"></script>
+        # <script type="text/javascript" src="/js/lockscreen.js"></script>
+        # <link href="/css/lockscreen.css" rel="stylesheet" type="text/css" />
+        #
+        # <html xmlns="http://www.w3.org/1999/xhtml">
+        # <head>
+        #         <title>缴费平台</title>
+        #         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        #         <meta name="renderer" content="webkit">
+        #         <style>
+        #         /* .bk img{ margin:100px 0px 0px 500px;} */
+        #         .if1{ text-align:center; font-size:24px; color:#cf1f1f; width:100%; margin:0 auto; font-weight:bold;}
+        #         .if2{ text-align:center; font-size:18px; color:#333333; width:100%; margin:0 auto; padding-top:10px;}
+        #         .if2 span{color:#00F; text-decoration:underline;}
+        #         </style>
+        # </head>
+        # <body style="background-color:#eeeeee;">
+        # <!-- <div class="bk"> -->
+        # <div align="center">
+        #     <img src="/images/system_error.png" />
+        # </div>
+        # <div class="if1">系统正在结账。<br>
+        #     系统开放时间早00:10到23:20。</div>
+        # <div class="if2"><span></span></div>
+        # </body>
+        # </html>
         return {"ok": False, "msg": "密码错误"}
     else:
         res_json = json.loads(res)
@@ -53,7 +84,8 @@ def cwsf_query(nickname, password, meter_id, factorycode):
 
 
 @app.post("/check/")
-def auto_health_check(nickname, sn, id_card, province, city, county, street, is_in_school):
+def auto_health_check(nickname: str, sn: str, id_card: str, province: str, city: str, county: str, street: str,
+                      is_in_school: bool):
     msg = HealthCheck(nickname, sn, id_card, province, city, county, street, is_in_school).health_check()
     if msg == "填报成功":
         return {"ok": True, "msg": msg}

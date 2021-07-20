@@ -50,7 +50,7 @@ class HealthCheck:
         self.__street = street
         self.__json_data = {"sn": sn, "idCard": id_card, "nickname": nickname}
         self.__is_in_school = is_in_school
-        self.__is_leave_chengdu = 1 - is_in_school
+        self.__is_leave_chengdu = bool(1 - is_in_school)
         self.__current_address = (
                 str(province) + str(city) + str(county) + str(street)
         )
@@ -244,26 +244,27 @@ class HealthCheck:
     # 健康填报全过程
     def health_check(self) -> str:
         logger.log(
-            self.__nickname + self.__sn + self.__id_card + self.__province + self.__city + self.__county + self.__street + self.__is_in_school,
+            self.__nickname + self.__sn + self.__id_card + self.__province + self.__city + self.__county + self.__street + str(self.__is_in_school),
             "healthCheck")
         self.get_session_id()
         msg_bind = self.__get_bind_user_info()
         json_bind = json.loads(msg_bind)
         # 绑定是否成功
-        try:
-            if json_bind["status"]:
-                msg_check = self.__submit_form()
-                self.__cancel_bind()
-                json_check = json.loads(msg_check)
-                if json_check["status"]:
-                    return "填报成功"
-                else:
-                    # 今日已填报
-                    return json_check["message"]
-            else:
-                self.__cancel_bind()
-                # 该学号已被其它微信绑定 输入信息不符合
-                return json_bind["message"]
-        finally:
+        # try:
+        if json_bind["status"]:
+            msg_check = self.__submit_form()
             self.__cancel_bind()
-            return "特殊错误"
+            json_check = json.loads(msg_check)
+            if json_check["status"]:
+                return "填报成功"
+            else:
+                # 今日已填报
+                return json_check["message"]
+        else:
+            self.__cancel_bind()
+            # 该学号已被其它微信绑定 输入信息不符合
+            return json_bind["message"]
+        # todo try 里不能 return 吗
+        # finally:
+        #     self.__cancel_bind()
+        #     return "特殊错误"
