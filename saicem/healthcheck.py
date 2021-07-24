@@ -256,14 +256,14 @@ class HealthCheck:
             self.__cancel_bind()
             json_check = json.loads(msg_check)
             if json_check["status"]:
-                return "填报成功"
+                return "填报成功",json_bind["data"]["user"]
             else:
                 # 今日已填报
-                return json_check["message"]
+                return json_check["message"],None
         else:
             self.__cancel_bind()
             # 该学号已被其它微信绑定 输入信息不符合
-            return json_bind["message"]
+            return json_bind["message"],None
         # todo try 里不能 return 吗
         # finally:
         #     self.__cancel_bind()
