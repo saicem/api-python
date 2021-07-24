@@ -259,7 +259,7 @@ class HealthCheck:
                 return "填报成功",json_bind["data"]["user"]
             else:
                 # 今日已填报
-                return json_check["message"],None
+                return json_check["message"],json_bind["data"]["user"]
         else:
             self.__cancel_bind()
             # 该学号已被其它微信绑定 输入信息不符合

@@ -115,7 +115,7 @@ def auto_health_check(check_form: HealthCheckForm):
         check_form.street,
         check_form.is_in_school
     ).health_check()
-    if msg == "填报成功":
+    if msg == "填报成功" or msg == "今日已填报":
         return {"ok": True, "msg": msg, "data": data}
     else:
         return {"ok": False, "msg": msg}
