@@ -12,6 +12,7 @@ app = FastAPI()
 def test():
     return "ok"
 
+
 class ElectricForm(BaseModel):
     sn: str
     id_card: str
@@ -38,8 +39,7 @@ class ElectricForm(BaseModel):
 @app.post("/cwsf/")
 def cwsf_query(form: ElectricForm):
     query = EleSpider()
-    res = query.get(
-        form.sn, form.id_card, form.meter_id, form.factorycode)
+    res = query.get(form.sn, form.id_card, form.meter_id, form.factorycode)
     if res[0] != "{":
         log(res, "cwsf")
         # 实际还有可能是 系统开放时间早00:10到23:20
@@ -112,7 +112,7 @@ def auto_health_check(check_form: HealthCheckForm):
         check_form.city,
         check_form.county,
         check_form.street,
-        check_form.is_in_school
+        check_form.is_in_school,
     ).health_check()
     if msg == "填报成功" or msg == "今日已填报":
         return {"ok": True, "msg": msg, "data": data}
