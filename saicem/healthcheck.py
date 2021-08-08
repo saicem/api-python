@@ -1,3 +1,4 @@
+from typing import Tuple
 import requests
 import random
 import json
@@ -242,7 +243,7 @@ class HealthCheck:
         log(resp.text, "healthCheck")
 
     # 健康填报全过程
-    def health_check(self) -> str:
+    def health_check(self) -> Tuple[str,str]:
         logger.log(
             self.__nickname + self.__sn + self.__id_card + self.__province + self.__city + self.__county + self.__street + str(self.__is_in_school),
             "healthCheck")
