@@ -12,7 +12,6 @@ app = FastAPI()
 def test():
     return "ok"
 
-
 class ElectricForm(BaseModel):
     sn: str
     id_card: str
@@ -105,7 +104,7 @@ class HealthCheckForm(BaseModel):
 
 @app.post("/check/")
 def auto_health_check(check_form: HealthCheckForm):
-    msg = HealthCheck(
+    msg, data = HealthCheck(
         check_form.nickname,
         check_form.sn,
         check_form.id_card,
@@ -115,7 +114,7 @@ def auto_health_check(check_form: HealthCheckForm):
         check_form.street,
         check_form.is_in_school
     ).health_check()
-    if msg == "填报成功":
-        return {"ok": True, "msg": msg}
+    if msg == "填报成功" or msg == "今日已填报":
+        return {"ok": True, "msg": msg, "data": data}
     else:
         return {"ok": False, "msg": msg}

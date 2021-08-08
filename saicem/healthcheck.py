@@ -1,3 +1,4 @@
+from typing import Tuple
 import requests
 import random
 import json
@@ -242,7 +243,7 @@ class HealthCheck:
         log(resp.text, "healthCheck")
 
     # 健康填报全过程
-    def health_check(self) -> str:
+    def health_check(self) -> Tuple[str,str]:
         logger.log(
             self.__nickname + self.__sn + self.__id_card + self.__province + self.__city + self.__county + self.__street + str(self.__is_in_school),
             "healthCheck")
@@ -256,14 +257,14 @@ class HealthCheck:
             self.__cancel_bind()
             json_check = json.loads(msg_check)
             if json_check["status"]:
-                return "填报成功"
+                return "填报成功",json_bind["data"]["user"]
             else:
                 # 今日已填报
-                return json_check["message"]
+                return json_check["message"],json_bind["data"]["user"]
         else:
             self.__cancel_bind()
             # 该学号已被其它微信绑定 输入信息不符合
-            return json_bind["message"]
+            return json_bind["message"],None
         # todo try 里不能 return 吗
         # finally:
         #     self.__cancel_bind()
