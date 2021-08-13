@@ -1,11 +1,18 @@
-from saicem.logger import log
 from saicem.electric import EleSpider
 from fastapi import FastAPI
 from saicem.healthcheck import HealthCheck
 from pydantic import BaseModel
 import json
+import logging
 
 app = FastAPI()
+
+logging.basicConfig(
+    format="%(levelname)s: %(asctime)s - %(filename)s:%(module)s[line:%(lineno)d] - %(message)s",
+    level=logging.INFO,
+    filename="log.log",
+    filemode="a",
+)
 
 
 @app.get("/")
@@ -38,10 +45,10 @@ class ElectricForm(BaseModel):
 # }
 @app.post("/cwsf/")
 def cwsf_query(form: ElectricForm):
+    logging.info(form)
     query = EleSpider()
     res = query.get(form.sn, form.id_card, form.meter_id, form.factorycode)
     if res[0] != "{":
-        log(res, "cwsf")
         # 实际还有可能是 系统开放时间早00:10到23:20
         # <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
         #
@@ -84,7 +91,7 @@ def cwsf_query(form: ElectricForm):
                 "data": remain_power,
             }
         except:
-            log(res_json, "electric")
+            logging.warning(res_json)
             return {
                 "ok": False,
                 "msg": "解析电费失败",

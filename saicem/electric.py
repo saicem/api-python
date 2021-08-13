@@ -2,6 +2,7 @@ import requests
 import cv2
 import numpy as np
 from saicem.imgDistinguish import char_distinguish
+import logging
 
 
 class EleSpider:
@@ -9,6 +10,10 @@ class EleSpider:
     __uriLogin = "http://cwsf.whut.edu.cn/innerUserLogin?logintype=PLATFORM&nickName={}&password={}&checkCode={}"
     __uriEleFee = "http://cwsf.whut.edu.cn/queryReserve"
     __cookie = ""
+    __logger = logging.getLogger("electric")
+
+    # def __init__(self) -> None:
+    #     self.__logger.info()
 
     def __get_code(self):
         resp = requests.get(self.__uriCode)
@@ -48,6 +53,7 @@ class EleSpider:
         return resp.text
 
     def get(self, nick_name, password, meter_id, factorycode):
+        # self.__logger.info(nick_name, password, meter_id, factorycode)
         # 识别验证码 最多识别10次
         for i in range(10):
             code_img = self.__get_code()

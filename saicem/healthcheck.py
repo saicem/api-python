@@ -1,10 +1,8 @@
+import logging
 from typing import Tuple
 import requests
 import random
 import json
-
-from saicem import logger
-from saicem.logger import log
 
 
 class HealthCheck:
@@ -32,15 +30,15 @@ class HealthCheck:
     __temperature_list = ["36°C以下", "36.5°C~36.9°C"]
 
     def __init__(
-            self,
-            nickname: str,
-            sn: str,
-            id_card: str,
-            province: str,
-            city: str,
-            county: str,
-            street: str,
-            is_in_school: bool,
+        self,
+        nickname: str,
+        sn: str,
+        id_card: str,
+        province: str,
+        city: str,
+        county: str,
+        street: str,
+        is_in_school: bool,
     ) -> None:
         self.__nickname = nickname
         self.__sn = sn
@@ -52,9 +50,7 @@ class HealthCheck:
         self.__json_data = {"sn": sn, "idCard": id_card, "nickname": nickname}
         self.__is_in_school = is_in_school
         self.__is_leave_chengdu = bool(1 - is_in_school)
-        self.__current_address = (
-                str(province) + str(city) + str(county) + str(street)
-        )
+        self.__current_address = str(province) + str(city) + str(county) + str(street)
 
     # 获取 data 下的 session_id 别的没什么卵用 至于检测绑定 code 参数来历不明
     # 已绑定
@@ -94,7 +90,7 @@ class HealthCheck:
         }
         resp = requests.post(url=url, headers=headers, json=self.__json_data)
         self.__session_id = json.loads(resp.text)["data"]["sessionId"]
-        log(resp.text, "healthCheck")
+        logging.info(resp.text)
 
     # 绑定用户
     # 已被绑定
@@ -157,7 +153,7 @@ class HealthCheck:
             "User-Agent": random.choice(self.__useragent_list),
         }
         resp = requests.post(url=url, headers=headers, json=self.__json_data)
-        log(resp.text, "healthCheck")
+        logging.info(resp.text)
         return resp.text
 
     # 提交表单
@@ -177,7 +173,10 @@ class HealthCheck:
     # }
     def __submit_form(self) -> str:
         current_address = (
-                str(self.__province) + str(self.__city) + str(self.__county) + str(self.__street)
+            str(self.__province)
+            + str(self.__city)
+            + str(self.__county)
+            + str(self.__street)
         )
         url = "https://zhxg.whut.edu.cn/yqtjwx/./monitorRegister"
         headers = {
@@ -210,7 +209,7 @@ class HealthCheck:
             "county": self.__county,
         }
         resp = requests.post(url=url, headers=headers, json=json_data)
-        log(resp.text, "healthCheck")
+        logging.info(resp.text)
         return resp.text
 
     # 取消绑定
@@ -240,13 +239,20 @@ class HealthCheck:
             "User-Agent": random.choice(self.__useragent_list),
         }
         resp = requests.post(url=url, headers=headers)
-        log(resp.text, "healthCheck")
+        logging.info(resp.text)
 
     # 健康填报全过程
-    def health_check(self) -> Tuple[str,str]:
-        logger.log(
-            self.__nickname + self.__sn + self.__id_card + self.__province + self.__city + self.__county + self.__street + str(self.__is_in_school),
-            "healthCheck")
+    def health_check(self) -> Tuple[str, str]:
+        logging.info(
+            self.__nickname
+            + self.__sn
+            + self.__id_card
+            + self.__province
+            + self.__city
+            + self.__county
+            + self.__street
+            + str(self.__is_in_school)
+        )
         self.get_session_id()
         msg_bind = self.__get_bind_user_info()
         json_bind = json.loads(msg_bind)
@@ -257,14 +263,14 @@ class HealthCheck:
             self.__cancel_bind()
             json_check = json.loads(msg_check)
             if json_check["status"]:
-                return "填报成功",json_bind["data"]["user"]
+                return "填报成功", json_bind["data"]["user"]
             else:
                 # 今日已填报
-                return json_check["message"],json_bind["data"]["user"]
+                return json_check["message"], json_bind["data"]["user"]
         else:
             self.__cancel_bind()
             # 该学号已被其它微信绑定 输入信息不符合
-            return json_bind["message"],None
+            return json_bind["message"], None
         # todo try 里不能 return 吗
         # finally:
         #     self.__cancel_bind()
