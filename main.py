@@ -12,6 +12,7 @@ logging.basicConfig(
     level=logging.INFO,
     filename="log.log",
     filemode="a",
+    encoding="utf-8",
 )
 
 
@@ -111,6 +112,7 @@ class HealthCheckForm(BaseModel):
 
 @app.post("/check/")
 def auto_health_check(check_form: HealthCheckForm):
+    logging.info(check_form)
     msg, data = HealthCheck(
         check_form.nickname,
         check_form.sn,
