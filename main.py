@@ -18,7 +18,7 @@ logging.basicConfig(
 
 @app.get("/")
 def test():
-    return "ok"
+    return {"ok": True}
 
 
 class ElectricForm(BaseModel):

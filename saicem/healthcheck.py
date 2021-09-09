@@ -237,7 +237,6 @@ class HealthCheck:
         msg_bind = self.__get_bind_user_info()
         json_bind = json.loads(msg_bind)
         # 绑定是否成功
-        # try:
         if json_bind["status"]:
             msg_check = self.__submit_form()
             self.__cancel_bind()
@@ -251,7 +250,3 @@ class HealthCheck:
             self.__cancel_bind()
             # 该学号已被其它微信绑定 输入信息不符合
             return json_bind["message"], None
-        # todo try 里不能 return 吗
-        # finally:
-        #     self.__cancel_bind()
-        #     return "特殊错误"

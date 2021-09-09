@@ -1,7 +1,7 @@
 import requests
 import cv2
 import numpy as np
-from saicem.imgDistinguish import char_distinguish
+from saicem.img_distinguish import char_distinguish
 import logging
 
 
